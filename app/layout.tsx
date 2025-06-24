@@ -14,6 +14,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script src="/env.js"></script>
+      </head>
       <body>{children}</body>
     </html>
   )
