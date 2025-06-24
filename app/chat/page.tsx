@@ -81,61 +81,6 @@ export default function ChatPage() {
     }
   }
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault()
-
-  //   if (!input.trim() || isLoading) return
-
-  //   // Add user message
-  //   const userMessage: Message = {
-  //     id: Date.now().toString(),
-  //     role: "user",
-  //     content: input,
-  //     timestamp: new Date(),
-  //   }
-
-  //   setMessages((prev) => [...prev, userMessage])
-  //   setInput("")
-  //   setIsLoading(true)
-
-  //   try {
-  //     // Call the API to generate a response
-  //     const response = await fetch("/api/chat/generate", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         prompt: input,
-  //         documentId,
-  //       }),
-  //     })
-
-  //     if (!response.ok) throw new Error("Failed to generate response")
-
-  //     const data = await response.json()
-
-  //     // Add assistant message
-  //     const assistantMessage: Message = {
-  //       id: (Date.now() + 1).toString(),
-  //       role: "assistant",
-  //       content: data.text,
-  //       timestamp: new Date(),
-  //     }
-
-  //     setMessages((prev) => [...prev, assistantMessage])
-  //   } catch (error) {
-  //     console.error("Error generating response:", error)
-  //     toast({
-  //       title: "Error",
-  //       description: "Failed to generate a response. Please try again.",
-  //       variant: "destructive",
-  //     })
-  //   } finally {
-  //     setIsLoading(false)
-  //   }
-  // }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -153,13 +98,20 @@ export default function ChatPage() {
     setIsLoading(true)
 
     try {
+      // Get the backend URL at runtime from the window object
+      const backendUrl = (typeof window !== "undefined" && window.env?.NEXT_PUBLIC_BACKEND_URL);
+
+      if (!backendUrl) {
+        throw new Error("Backend URL is not defined. Please check your environment variables configuration.");
+      }
+
       // Prepare OpenAI-compatible messages array
       const chatMessages = [
         { role: "system", content: "You are a helpful study assistant. Answer questions based on the syllabus context provided." },
         { role: "user", content: userMessage.content }
       ]
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/chat/completions`, {
+      const response = await fetch(`${backendUrl}/v1/chat/completions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
