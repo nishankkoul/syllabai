@@ -1,39 +1,23 @@
-# Stage 1: Install dependencies
-FROM node:20-alpine AS deps
+# Use a standard Node.js base image
+FROM node:20-alpine
+
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy package.json and lock file
+# Copy package configuration files
 COPY package.json package-lock.json* ./
 
-# Install dependencies using --legacy-peer-deps to match your local setup
+# Install dependencies using the same flag that worked for you locally
 RUN npm install --legacy-peer-deps
 
-# Stage 2: Build the application
-FROM node:20-alpine AS builder
-WORKDIR /app
-
-# Copy dependencies from the previous stage
-COPY --from=deps /app/node_modules ./node_modules
-# Copy the rest of the application source code
+# Copy the rest of your application source code into the container
 COPY . .
 
-# Build the Next.js application
+# Build the Next.js application for production
 RUN npm run build
 
-# Stage 3: Production image
-FROM node:20-alpine AS runner
-WORKDIR /app
-
-# Set environment to production
-ENV NODE_ENV=production
-
-# Copy the standalone Next.js server output
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-
-# Expose the port the app runs on
+# Expose the port the app will run on
 EXPOSE 3000
 
-# The command to run the application
-CMD ["node", "server.js"] 
+# The command to start the application
+CMD ["npm", "start"] 
