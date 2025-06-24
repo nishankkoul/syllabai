@@ -153,36 +153,20 @@ export default function ChatPage() {
     setIsLoading(true)
 
     try {
-      const chatHistory = [
-        {
-          lc: 1,
-          type: "human",
-          id: [userMessage.id],
-          lc_kwargs: {
-            content: userMessage.content,
-            additional_kwargs: {},
-            response_metadata: {},
-            tool_calls: [],
-            invalid_tool_calls: [],
-          },
-        },
+      // Prepare OpenAI-compatible messages array
+      const chatMessages = [
+        { role: "system", content: "You are a helpful study assistant. Answer questions based on the syllabus context provided." },
+        { role: "user", content: userMessage.content }
       ]
 
-      const url = new URL(`${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/generate`)
-      url.searchParams.append("stream", "false")
-      url.searchParams.append("researchMode", "false")
-      url.searchParams.append("scope", "internal")
-      // Optional: Add phone, username, title, source etc. if available
-
-      const response = await fetch(url.toString(), {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/v1/chat/completions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_KEY}`,
         },
         body: JSON.stringify({
-          chat_history: chatHistory,
-          persona: "", // Optional, can remove if unused
+          model: "Qwen/Qwen2.5-7B-Instruct-AWQ",
+          messages: chatMessages,
         }),
       })
 
@@ -193,7 +177,7 @@ export default function ChatPage() {
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: data.result.response.kwargs.content,
+        content: data.choices?.[0]?.message?.content || "[No response]",
         timestamp: new Date(),
       }
 
