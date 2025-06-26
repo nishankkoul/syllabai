@@ -111,7 +111,7 @@ export default function ChatPage() {
         { role: "user", content: userMessage.content }
       ]
 
-      const response = await fetch(`${backendUrl}/v1/completions`, {
+      const response = await fetch(`${backendUrl}/v1/chat/completions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
